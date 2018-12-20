@@ -14,13 +14,15 @@ import animate
 
 import config
 import balls
+from scores import Scoreboard
+
 ##################
 
 
 #	prefer window in top-right corner
 #os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (1080,0)
 
-tileset_image = pygame.image.load(config.image_paths[0])
+
 racket_image = pygame.image.load(config.image_paths[1])
 
 
@@ -75,7 +77,7 @@ class Graphic (pygame.sprite.Sprite):
 		r.x = x * ss
 
 
-		self.image = tileset_image.subsurface(r)
+		self.image = config.tileset_image.subsurface(r)
 		self.rect = self.image.get_rect()
 		self.rect.x = position[0]
 		self.rect.y = position[1]
@@ -92,7 +94,7 @@ class Block (pygame.sprite.Sprite):
 		if x == -1:
 			x = random.randint(0,6)
 		r.x = x * 8
-		self.image = tileset_image.subsurface(r)
+		self.image = config.tileset_image.subsurface(r)
 		self.rect = self.image.get_rect()
 		self.rect.x = position[0]
 		self.rect.y = position[1]
@@ -198,6 +200,7 @@ class Game(object):
 
 		
 		self.player = Paddle()
+		self.scores = Scoreboard(vector.Vector2D(10*config.sprite_size,10*config.sprite_size), 57)
 		
 
 		border_graphics(graphic_group)
@@ -225,7 +228,8 @@ class Game(object):
 		balls.group.draw(screen)
 
 		
-
+		self.scores.draw(screen)
+			
 		self.player.draw(screen)
 
 
@@ -244,7 +248,7 @@ class Game(object):
 			self.player.update(time, x_dir)
 			# update balls
 			# update blocks
-			
+			self.scores.update()
 
 		if self.keys[keyboard.M.ESC]:
 			self.end()
