@@ -19,10 +19,6 @@ from scores import Scoreboard
 ##################
 
 
-#	prefer window in top-right corner
-#os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (1080,0)
-
-
 class Graphic (pygame.sprite.Sprite):
 	
 	def __init__(self, position, frame=-1):
@@ -214,6 +210,8 @@ if __name__ == "__main__":
 	if len(sys.argv) > 1:
 		if sys.argv[1] == "-d" or sys.argv[1] == "--demo":
 			config.demo = True
+			#	prefer window in top-right corner
+			os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (945,18)
 			
 
 	
