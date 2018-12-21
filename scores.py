@@ -5,25 +5,29 @@ import config
 
 class Scoreboard(pygame.sprite.Sprite):
 
-	num_digits = 6
 
-#	sprites = None
 	images = None
+	@staticmethod
+	def __load_images(size):
+		""" size = width of sprites """
+		l = list()
+		for x in range(0,9):
+			l.append(pygame.Rect(x*size, 4*size, size, size))
+		Scoreboard.sprites = l
+		
+		k = list()
+		for digit in l:
+			k.append(config.tileset_image.subsurface(digit))
+		Scoreboard.images = k
+
+
+	num_digits = 6
 
 	def __init__(self, position, start_score=0):
 		ss = config.sprite_size
 		if Scoreboard.images == None:
+			Scoreboard.__load_images(ss)
 			
-			l = list()
-			for x in range(0,9):
-				l.append(pygame.Rect(x*ss, 4*ss, ss, ss))
-			Scoreboard.sprites = l
-			
-			k = list()
-			for digit in l:
-				k.append(config.tileset_image.subsurface(digit))
-			Scoreboard.images = k
-		
 		super(Scoreboard, self).__init__()
 		size = (Scoreboard.num_digits*ss, Scoreboard.num_digits*ss)
 		self.image = pygame.Surface(size)

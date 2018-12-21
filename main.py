@@ -5,7 +5,6 @@ import math
 import random
 
 import pygame
-#import pygame.image
 
 import keyboard
 import intersections
@@ -44,7 +43,6 @@ class Paddle (pygame.sprite.Sprite):
 	def draw(self, screen):
 		screen.blit(self.image, self.rect)
 	
-
 	def update(self, time, x_input):
 		def_speed = 0.3
 		ps = config.play_size
@@ -82,6 +80,22 @@ class Graphic (pygame.sprite.Sprite):
 		self.rect.x = position[0]
 		self.rect.y = position[1]
 
+graphic_group = pygame.sprite.Group()
+
+def border_graphics (g):
+	bs = config.border_size
+	zs = config.sprite_size
+	for y in range (0,bs[1]/zs):
+		for x in range (0, bs[0]/zs):
+			blk = Graphic((x*zs, y*zs))
+			g.add(blk)
+		
+	for y in range (0,bs[1]/zs):
+		for x in range (0, bs[0]/zs):
+			blk = Graphic((x*zs + (config.screen_size[0] - bs[0]), y*zs))
+			g.add(blk)
+
+
 
 
 class Block (pygame.sprite.Sprite):
@@ -93,53 +107,44 @@ class Block (pygame.sprite.Sprite):
 		x = frame
 		if x == -1:
 			x = random.randint(0,6)
-		r.x = x * 8
+		r.x = x * ss
 		self.image = config.tileset_image.subsurface(r)
 		self.rect = self.image.get_rect()
 		self.rect.x = position[0]
 		self.rect.y = position[1]
-		
 
-
-graphic_group = pygame.sprite.Group()
-
-
-
-def border_graphics (g):
-	bs = config.border_size
-	
-	for y in range (0,bs[1]/8):
-		for x in range (0, bs[0]/8):
-			blk = Graphic((x*8, y*8))
-			g.add(blk)
-		
-	for y in range (0,bs[1]/8):
-		for x in range (0, bs[0]/8):
-			blk = Graphic((x*8 + (config.screen_size[0] - bs[0]), y*8))
-			g.add(blk)
-
-
-	
 block_group = pygame.sprite.Group()			
 
 
 
-def randomBalls(g):
+def demo_blocks(g):
+	ss = config.sprite_size
+	ps = config.play_size
+	num_blocks_x = (ps.w - 2*ss) / ss
+	for y in range(0, 3):
+		y_coord = ss * (y + 1)
+		for x in range(0,num_blocks_x):
+			x_coord = (1+x)*ss + ps.x
+			b = Block( ( x_coord, y_coord),y%6)
+			g.add(b)
+
+def demo_balls(g):
 	ps = config.play_size
 	for x in range(0, random.randint(3,7)):
-		pos_y = random.randint(0, ps.h - config.ball_size)
-		pos_x = random.randint(ps.x, ps.x + ps.w - 24)
+		pos_y = random.randint(1, ps.h - 1 - config.ball_size)
+		pos_x = random.randint(ps.x + 1, ps.x - 1 + ps.w - 24)
 		pos = (pos_x, pos_y)
 
-		vel_x = float(random.randint(10,20))
-		vel_y = float(random.randint(10,20))
+		vel_x = float(random.randint(10, 20))
+		vel_y = float(random.randint(10, 20))
 		
-		vel_x /=83
-		vel_y /=83
+		vel_x /= 83
+		vel_y /= 83
 		vel = (vel_x, vel_y)
 
 		b = balls.Ball(pos, vel)
 		b.add(g)
+
 
 class GameDemo(object):
 
@@ -151,7 +156,7 @@ class GameDemo(object):
 		
 		border_graphics(graphic_group)
 
-		randomBalls(balls.group)
+		demo_balls(balls.group)
 	
 		
 	def update(self, time):
@@ -164,10 +169,6 @@ class GameDemo(object):
 				self.paused = True
 
 
-
-
-
-
 			balls.group.update(time)
 
 
@@ -175,11 +176,9 @@ class GameDemo(object):
 
 		if self.keys[keyboard.M.ESC]:
 			self.end()
-		
 		return self.ended
 
-	def draw(self, screen):			
-		
+	def draw(self, screen):
 		screen.fill((0,0,0))
 		
 		balls.group.draw(screen)
@@ -198,38 +197,21 @@ class Game(object):
 		self.paused = False
 		self.keys = keyboard.Listener()
 
-		
 		self.player = Paddle()
 		self.scores = Scoreboard(vector.Vector2D(10*config.sprite_size,10*config.sprite_size), 57)
 		
-
 		border_graphics(graphic_group)
-
-		ss = config.sprite_size
-		ps = config.play_size
-		num_blocks_x = (ps.w - 2*ss) / ss
-		for y in range(0, 3):
-			y_coord = ss * (y + 1)
-			for x in range(0,num_blocks_x):
-				x_coord = (1+x)*ss + ps.x
-				b = Block( ( x_coord, y_coord),y%6)
-				b.add(block_group)
+		demo_blocks(block_group)
 
 
-
-	
 	def draw(self, screen):
 		screen.fill((0,0,0))
 		
 		graphic_group.draw(screen)
-
 		block_group.draw(screen)
-
 		balls.group.draw(screen)
 
-		
 		self.scores.draw(screen)
-			
 		self.player.draw(screen)
 
 
@@ -263,60 +245,50 @@ class Game(object):
 
 
 
-
+def start_menu():
+	pass
 
 if __name__ == "__main__":
 	
 	if len(sys.argv) > 1:
 		if sys.argv[1] == "-d" or sys.argv[1] == "--demo":
 			config.demo = True
+			
 
-
+	
 
 	pygame.init()
-	
 	screen = pygame.display.set_mode(config.screen_size)
 	
 	
-	
+	""" no menu or anything yet """
+	start_menu()
+
 	game = None
 	if config.demo:
 		game = GameDemo()
 	else:
 		game = Game()
-
-
 	
 	
-
 	time = 10
-	
 	while(1):
 		time_spent = - pygame.time.get_ticks()
+		
 		for e in pygame.event.get():
 			if e.type == pygame.QUIT:
 				game.end()
 		
-
-
 		if game.update(time):
 			break
-		
 		if not game.paused:
-			
 			game.draw(screen)
-
-
 			pygame.display.flip()
-		
-
 
 		time_spent += pygame.time.get_ticks()
 		time = time_spent
-		
-
 
 		pygame.time.delay(5)
 		
 	pygame.quit()
-	
+	print "Good-bye~"

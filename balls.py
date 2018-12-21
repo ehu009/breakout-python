@@ -11,6 +11,8 @@ group = pygame.sprite.Group()
 size = config.ball_size
 arena = config.play_size
 
+
+
 class Ball (pygame.sprite.Sprite):
 	
 	group = pygame.sprite.Group()
@@ -19,7 +21,7 @@ class Ball (pygame.sprite.Sprite):
 	ttn = 40
 
 	@staticmethod
-	def _loadGraphics():
+	def __load_graphics():
 		l = list()
 		for x in range (0,4):
 			l.append((size*x,0, size, size))
@@ -28,7 +30,7 @@ class Ball (pygame.sprite.Sprite):
 
 	def __init__(self, position, velocity):
 		if Ball.sprites == None:
-			Ball._loadGraphics()
+			Ball.__load_graphics()
 
 		super(Ball, self).__init__()
 		
