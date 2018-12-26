@@ -3,7 +3,7 @@ import random
 import pygame
 
 import config
-
+import text
 
 class Scoreboard(pygame.sprite.Sprite):
 
@@ -42,7 +42,7 @@ class Scoreboard(pygame.sprite.Sprite):
 			Scoreboard.__load_tiles(ss)
 
 		super(Scoreboard, self).__init__()
-		size = ((Scoreboard.num_digits+2)*ss, 3*ss)
+		size = ((Scoreboard.num_digits+2)*ss, 5*ss)
 		self.image = pygame.Surface(size)
 
 		self.rect = self.image.get_rect()
@@ -58,8 +58,10 @@ class Scoreboard(pygame.sprite.Sprite):
 		self.__decorate(ss)
 
 
+
 	def __decorate(self, size):
 		self.decour = list()
+		self.text = text.Text((size, size), "scores")
 		""" top row of border decour """
 		r = pygame.Rect(0,0,size,size)
 		for x in range(0,self.rect.w/size):
@@ -72,6 +74,20 @@ class Scoreboard(pygame.sprite.Sprite):
 		self.decour.append(r.copy())
 		r.x = 0
 		self.decour.append(r.copy())
+
+		""" middle row of border decour """
+		r.y += size
+		for x in range(0,self.rect.w/size):
+			rc = r.copy()
+			self.decour.append(rc)
+			r.x += size
+
+		r.y += size
+		r.x -= size
+		self.decour.append(r.copy())
+		r.x = 0
+		self.decour.append(r.copy())
+		
 		""" bottom row of border decour """
 		r.y += size
 		for x in range(0,self.rect.w/size):
@@ -104,13 +120,14 @@ class Scoreboard(pygame.sprite.Sprite):
 	def draw(self, screen):
 		for rect in self.decour:
 			self.image.blit(Scoreboard.tiles[self.gfx], rect)
+		self.text.draw(self.image)
 		self.draw_digits(screen)
 		screen.blit(self.image, self.rect)
 
 	def draw_digits(self, screen):
 		ss = config.sprite_size
 		c = 0
-		r = pygame.Rect(ss, ss, ss, ss)
+		r = pygame.Rect(ss, 3*ss, ss, ss)
 		while c < Scoreboard.num_digits:
 			self.image.blit(Scoreboard.images[self.digits[c]], r)
 			r.x += ss
