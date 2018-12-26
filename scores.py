@@ -13,7 +13,7 @@ class Scoreboard(pygame.sprite.Sprite):
 	def __load_images(size):
 		""" size = width of sprites """
 		l = list()
-		for x in range(0,9):
+		for x in range(0,10):
 			l.append(pygame.Rect(x*size, 4*size, size, size))
 		Scoreboard.sprites = l
 		
@@ -27,7 +27,7 @@ class Scoreboard(pygame.sprite.Sprite):
 	def __load_tiles(size):
 		l = list()
 		r = pygame.Rect(0, 0, size, size)
-		for x in range(0, 9):
+		for x in range(0, 10):
 			l.append(config.tileset_image.subsurface(r))
 			r.x += size
 		Scoreboard.tiles = l
