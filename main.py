@@ -70,6 +70,14 @@ class Block (pygame.sprite.Sprite):
 		self.rect.x = position[0]
 		self.rect.y = position[1]
 
+
+
+
+
+
+
+	
+
 block_group = pygame.sprite.Group()			
 
 
@@ -114,7 +122,8 @@ class GameDemo(object):
 		border_graphics(graphic_group)
 
 		demo_balls(balls.group)
-	
+
+		self.ttnBlock = 130
 		
 	def update(self, time):
 		self.keys.update()
@@ -127,8 +136,23 @@ class GameDemo(object):
 
 
 			balls.group.update(time)
+		
+		#spawn a block somewhere
+		if self.ttnBlock <= 0:
+			ps = config.play_size
+			x = ps.w / config.sprite_size
+			x = random.randint(0, x)
+			x *= config.sprite_size
+			x += ps.x
 
+			y = ps.h / config.sprite_size
+			y = random.randint(0, y)
+			y *= config.sprite_size
+			y += ps.y
 
+			block_group.add(Block((x,y)))
+
+			self.ttnBlock = 130
 
 
 		if self.keys[keyboard.M.ESC]:
@@ -184,7 +208,31 @@ class Game(object):
 
 			x_dir = self.keys[keyboard.M.RGT]
 			x_dir -= self.keys[keyboard.M.LFT]
-			self.player.update(time, x_dir)
+			self.player.update(time, x_dir, self.keys[keyboard.M.UP]-0)
+			
+				
+			balls.group.update(time)
+
+			block_collisions = pygame.sprite.groupcollide(balls.group, block_group, False, True)
+			for key, value in block_collisions.iteritems():
+				if value == None:
+					continue
+				for block in value:
+					"""determine if ball bounces off vertically or horizontally"""
+					d = vector.Vector2D(key.pos.x, key.pos.y)
+					
+					d.x -= block.rect.x
+					d.y -= block.rect.y
+
+					if d.x ** 2 < d.y ** 2:
+						key.bounceX()
+					else:
+						key.bounceY()
+					"""	destroy block """
+					del block
+				config.sounds['beep.wav'].play()
+
+
 			# update balls
 			# update blocks
 			self.scores.update()
@@ -200,8 +248,6 @@ class Game(object):
 
 
 
-
-
 def start_menu():
 	pass
 
@@ -212,11 +258,12 @@ if __name__ == "__main__":
 			config.demo = True
 			#	prefer window in top-right corner
 			os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (945,18)
-			
-
 	
-
 	pygame.init()
+	pygame.mixer.init()
+
+	config.load_sounds()	
+
 	screen = pygame.display.set_mode(config.screen_size)
 	
 	
