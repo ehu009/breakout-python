@@ -42,6 +42,8 @@ class Ball (pygame.sprite.Sprite):
 		self.pos = vector.Vector2D(position[0], position[1])
 		self.vel = vector.Vector2D(velocity[0], velocity[1])
 		
+#		config.sounds['ball.wav'].play()
+
 		self.lastTime = 0
 		
 	def bounceX(self):
@@ -69,8 +71,12 @@ class Ball (pygame.sprite.Sprite):
 				self.bounceY()
 			else:
 				self.kill()
+				config.sounds['pit.wav'].play()
 		self.pos = pos
 		return self.pos
+	
+	def ball_collision(self, ball):
+		pass
 
 	def update(self, time):
 		
@@ -87,4 +93,3 @@ class Ball (pygame.sprite.Sprite):
 		
 		self.rect.x = self.pos.x
 		self.rect.y = self.pos.y
-
