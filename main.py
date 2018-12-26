@@ -179,7 +179,7 @@ class Game(object):
 		self.keys = keyboard.Listener()
 
 		self.player = Paddle()
-		self.scores = Scoreboard(vector.Vector2D(10*config.sprite_size,10*config.sprite_size), 57)
+		self.scores = Scoreboard((0,20*config.sprite_size), 57)
 		
 		border_graphics(graphic_group)
 		demo_blocks(block_group)
