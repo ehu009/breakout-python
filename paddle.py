@@ -1,6 +1,7 @@
 import pygame
 import config
 import vector
+import balls
 
 
 racket_image = pygame.image.load(config.image_paths[1])
@@ -19,11 +20,12 @@ class Paddle (pygame.sprite.Sprite):
 		self.rect = pygame.Rect(x, y, 6*ss, 2*ss)
 		self.image = racket_image
 	
+		self.ttn = config.firing_interval
 	
 	def draw(self, screen):
 		screen.blit(self.image, self.rect)
 	
-	def update(self, time, x_input):
+	def update(self, time, x_input, y_input):
 		def_speed = 0.3
 		ps = config.play_size
 		
@@ -39,5 +41,27 @@ class Paddle (pygame.sprite.Sprite):
 		
 		self.pos.x += self.vel.x*time
 		self.rect.x = self.pos.x
+		
+		self.ttn -= time
 
+		if y_input == 1:
+			self.spawn_ball(balls.group)
+
+	def spawn_ball (self, group):
+		if self.ttn <= 0:
+			
+			bx = self.pos.x
+
+			by = self.pos.y - config.ball_size
+			bx += (config.sprite_size*3/2)
+			bx -= (config.ball_size/2)
+			
+			b_pos = (bx, by)
+
+			vx = self.vel.x
+			vy = self.vel.y - 0.2
+
+			b = balls.Ball(b_pos, (vx, vy))
+			group.add(b)
+			self.ttn = config.firing_interval
 
