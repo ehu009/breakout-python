@@ -5,6 +5,9 @@
 		}
 	],
 	"settings": {
-		"editor.insertSpaces": false
+		"editor.insertSpaces": false,
+		"files.exclude": {
+			"**/*.pyc": true
+		}
 	}
 }
