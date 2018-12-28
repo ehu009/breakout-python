@@ -10,7 +10,7 @@ import keyboard
 import intersections
 import vector
 import animate
-
+from staticgfx import *
 import config
 import balls
 from paddle import Paddle
@@ -18,26 +18,6 @@ from scores import Scoreboard
 
 ##################
 
-
-class Graphic (pygame.sprite.Sprite):
-	
-	def __init__(self, position, frame=-1):
-		super(Graphic, self).__init__()
-		ss = config.sprite_size
-		r = pygame.Rect(0, 0, ss, ss)
-		x = frame
-		if x == -1:
-			x = random.randint(0, 5)
-		
-		r.x = x * ss
-
-
-		self.image = config.tileset_image.subsurface(r)
-		self.rect = self.image.get_rect()
-		self.rect.x = position[0]
-		self.rect.y = position[1]
-
-graphic_group = pygame.sprite.Group()
 
 def border_graphics (g):
 	bs = config.border_size
