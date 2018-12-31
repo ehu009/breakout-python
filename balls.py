@@ -7,11 +7,15 @@ import animate
 import intersections
 from helpers import *
 
+import blocks
+
+
 group = pygame.sprite.Group()
 
 
 size = config.ball_size
 arena = config.play_size
+
 
 
 class Circle():
@@ -87,6 +91,7 @@ class Ball (pygame.sprite.Sprite, Circle):
 				config.sounds['pit.wav'].play()
 		return pos
 	
+	"""
 	def _rect_collision(self,  rect):
 		# Compare with zero
 		def ft(x):	
@@ -164,7 +169,7 @@ class Ball (pygame.sprite.Sprite, Circle):
 			self.pos.y = v.y *(hh + rad*2 +1) +(rect.y + hh)
 		if v.y > 0:
 			self.pos.y = v.y *(hh + 1) +(rect.y + hh)
-		
+	"""
 	
 	
 	def _intersection_vector (self, rect):		
@@ -224,7 +229,7 @@ class Ball (pygame.sprite.Sprite, Circle):
 		self.pos = nextpos
 
 		""" interact with blocks """
-		blocks = pygame.sprite.spritecollide(self, blocks, True, intersections.intersection_BR)
+		blocks = pygame.sprite.spritecollide(self, blocks, False, intersections.intersection_BR)
 		if blocks is not None:
 			xbounce = 0
 			ybounce = 0
@@ -270,3 +275,78 @@ class Ball (pygame.sprite.Sprite, Circle):
 
 		self.rect.x = self.pos.x
 		self.rect.y = self.pos.y
+
+
+
+import keyboard
+
+
+
+
+
+
+if __name__ == "__main__":
+	pygame.init()
+	pygame.mixer.init()
+
+
+	block_x = 100
+	block_y = 100
+
+	b = blocks.Block((block_x, block_y))
+	blocks.group.add(b)
+
+	spawn_x = block_x - 24
+	spawn_y = 200
+
+
+	def spawn(x, y):
+		b_pos = (x, y)
+
+		vx = 0
+		vy = -1
+
+		b = Ball(b_pos, (vx, vy))
+		group.add(b)
+
+	screen = pygame.display.set_mode(config.screen_size)
+	
+	key = keyboard.Listener()
+	""" no menu or anything yet """
+	
+	quit = False
+
+	spawned = False
+
+	time = 10
+	while(not quit):
+		time_spent = - pygame.time.get_ticks()
+		
+		for e in pygame.event.get():
+			if e.type == pygame.QUIT:
+				quit = True
+		
+		if (key[keyboard.M.ESC]):
+			quit = True
+		if (key[keyboard.M.SPC] and not spawned):
+			spawn(spawn_x, spawn_y)
+			spawn_x += 2
+			spawned = True
+		elif spawned == True and key[keyboard.M.SPC] == 0:
+			spawned = False
+
+		screen.fill(0)
+		key.update()
+		group.update(time, blocks.group)
+		group.draw(screen)
+		blocks.group.draw(screen)
+
+		pygame.display.flip()
+
+		time_spent += pygame.time.get_ticks()
+		time = time_spent
+		
+		pygame.time.delay(5)
+		
+	pygame.quit()
+	print "Good-bye~"
