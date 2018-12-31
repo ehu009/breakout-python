@@ -38,7 +38,7 @@ def border_graphics (g):
 class Block (pygame.sprite.Sprite):
 	
 	def __init__(self, position, frame=-1):
-		super(Block, self).__init__()
+		
 		ss = config.sprite_size
 		r = pygame.Rect(0, 0, ss,ss)
 		x = frame
@@ -49,7 +49,7 @@ class Block (pygame.sprite.Sprite):
 		self.rect = self.image.get_rect()
 		self.rect.x = position[0]
 		self.rect.y = position[1]
-
+		super(Block, self).__init__()
 
 
 
@@ -150,6 +150,8 @@ class GameDemo(object):
 
 
 
+from intersections import intersection_BR
+
 class Game(object):
 	
 	
@@ -191,14 +193,15 @@ class Game(object):
 			self.player.update(time, x_dir, self.keys[keyboard.M.UP]-0)
 			
 				
-			balls.group.update(time)
+			balls.group.update(time, block_group)
 
-			block_collisions = pygame.sprite.groupcollide(balls.group, block_group, False, True)
+			
+			"""
 			for key, value in block_collisions.iteritems():
 				if value == None:
 					continue
 				for block in value:
-					"""determine if ball bounces off vertically or horizontally"""
+					# determine if ball bounces off vertically or horizontally
 					d = vector.Vector2D(key.pos.x, key.pos.y)
 					
 					d.x -= block.rect.x
@@ -208,9 +211,10 @@ class Game(object):
 						key.bounceX()
 					else:
 						key.bounceY()
-					"""	destroy block """
+					#	destroy block 
 					del block
 				config.sounds['beep.wav'].play()
+			"""
 
 
 			# update balls
