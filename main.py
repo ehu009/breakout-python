@@ -127,8 +127,6 @@ class GameDemo(object):
 
 
 
-from intersections import intersection_BR
-
 class Game(object):
 	
 	

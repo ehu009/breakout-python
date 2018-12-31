@@ -92,31 +92,31 @@ class Ball (pygame.sprite.Sprite, Circle):
 		return pos
 	
 	@staticmethod
-	def _bounce (c, r):
+	def _bounce (p, radius, r):
 		half = (float(r.w)/2, float(r.h)/2)
-		center = (c.pos.x + c.radius - (r.x+half[0]), c.pos.y + c.radius - (r.y+half[1]))
+		center = (p.x + radius - (r.x+half[0]), p.y + radius - (r.y+half[1]))
 		side = (abs(center[0]) - half[0], abs(center[1]) - half[1])
 
-		if (side[0] > c.radius or side[1] > c.radius):
+		if (side[0] > radius or side[1] > radius):
 			return False
-		if (side[0] < -c.radius and side[1] < - c.radius):
+		if (side[0] < -radius and side[1] < -radius):
 			return False
 
 		if (side[0] < 0 or side[1] < 0):
 			dx = 0
 			dy = 0
-			if (abs(side[0]) < c.radius and side[1] < 0):
+			if (abs(side[0]) < radius and side[1] < 0):
 				if center[0]*side[0] < 0:
 					dx = -1
 				else:
 					dx = 1
-			elif (abs(side[1]) < c.radius and side[0] < 0):
+			elif (abs(side[1]) < radius and side[0] < 0):
 				if (center[1]*side[1] < 0):
 					dy = -1
 				else:
 					dy = 1
 			return (dx, dy)
-		bounce = (side[0] ** 2) + (side[1] ** 2) < c.radius ** 2
+		bounce = (side[0] ** 2) + (side[1] ** 2) < radius ** 2
 		if (bounce is False):
 			return False
 		norm = math.sqrt((side[0] ** 2) + (side[1] ** 2))
@@ -130,10 +130,10 @@ class Ball (pygame.sprite.Sprite, Circle):
 		dx /= norm
 		dy *= side[1]
 		dy /= norm
-		return (dx, dy)
+		return (dx, dy, norm)
+
 
 	def update(self, time, blocks):
-		
 
 		nextpos = self.pos + (self.vel * time)
 		
@@ -145,35 +145,31 @@ class Ball (pygame.sprite.Sprite, Circle):
 			self.lastTime %= Ball.ttn
 
 		""" interact with walls """
-	#	nextpos = self.border_collision(nextpos, config.play_size)
+		nextpos = self.border_collision(nextpos, config.play_size)
 		
-		self.pos = nextpos
+
 		""" interact with blocks """
+		bounced = False
+		speed = self.vel.magnitude()
 		for block in blocks:
-			v = Ball._bounce(self, block.rect)
+			v = Ball._bounce(nextpos, self.radius, block.rect)
 			if v is not False and v != (0, 0):
-				print v
-				vec =vector.Vector2D(v[0], v[1])
-				if v[0] != 0:
-					if self.vel.x == 0:
-						self.vel.x = v[0]
-					else:
-						vx = self.vel.x * v[0]
-						self.vel.x = -vx
-						nextpos.x += v[0]
-				if v[1] != 0:
-					if self.vel.y == 0:
-						self.vel.y = v[1]
-					else:
-						vy = self.vel.y * v[1]
-						self.vel.y = -vy
-						nextpos.y += v[1]
-		self.pos = nextpos		
-
+				bounced = True
 				
+				# adjust velocity
+				vec = vector.Vector2D(v[0], v[1])
+				vec *= speed
+				self.vel = vec
+				
+				# add code here for what happens to the blocks
+				# ...
+		if bounced:
+			# sounds, animations or something
+			pass	
+				
+
+		self.pos = nextpos		
 		
-
-
 		self.rect.x = self.pos.x
 		self.rect.y = self.pos.y
 
@@ -190,20 +186,20 @@ if __name__ == "__main__":
 	pygame.mixer.init()
 
 
-	block_x = 100
+	block_x = 400
 	block_y = 100
 
 	b = blocks.Block((block_x, block_y))
 	blocks.group.add(b)
 
-	spawn_x = block_x + 170
+	spawn_x = block_x -200
 	spawn_y = 100-24
 
 
 	def spawn(x, y):
 		b_pos = (x, y)
 
-		vx = -1
+		vx = 4
 		vy = 0
 
 		b = Ball(b_pos, (vx, vy))
