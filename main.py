@@ -170,7 +170,7 @@ class Game(object):
 			self.player.update(time, x_dir, self.keys[keyboard.M.UP]-0)
 			
 				
-			balls.group.update(time, block_group)
+			balls.group.update(time, blocks.group)
 
 			
 			"""
