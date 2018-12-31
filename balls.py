@@ -1,3 +1,5 @@
+import math
+
 import pygame
 
 import config
@@ -5,7 +7,6 @@ import vector
 import animate
 
 import intersections
-from helpers import *
 
 import blocks
 
@@ -15,7 +16,6 @@ group = pygame.sprite.Group()
 
 size = config.ball_size
 arena = config.play_size
-
 
 
 class Circle():
@@ -91,130 +91,50 @@ class Ball (pygame.sprite.Sprite, Circle):
 				config.sounds['pit.wav'].play()
 		return pos
 	
-	"""
-	def _rect_collision(self,  rect):
-		# Compare with zero
-		def ft(x):	
-			if x == 0:
-				return 0
-			return x/abs(x)
-		# Hit-test: Rect, Ball
-		def intersection_vector (ball, rect):		
-			#	Input:	| - ball: Ball object
-			#			| - rect: Rect object
-			#		ball and rect objects have (x,y) coordinates i in top-left corner
-			#	Return:	| - If Ball og Rect har kollidert:
-			#			|  	Vector2D object indicating surface on Rect hit by Ball
-			#			| - Ellers: False
-			#
-			rad = ball.radius	#Radius
-			hw = rect.w/2		#Distance from centre of Rect to left/right edges/corners
-			hh = rect.h/2		#Distance from centre of Rect to top/bottom edges/corners
-			
-			dx = (ball.pos.x+rad)-(rect.x+hw)	#Ball x-position relative to Rect
-			dy = (ball.pos.y+rad)-(rect.y+hh)	#Ball y-position relative to Rect
-			
-			mDX = rad + hw					#Maximum dx
-			mDY = rad + hh					#Maximum dy
-			#make x, y distances into ratios
-			dx /= mDX 
-			dy /= mDY
-			
-			#make variables representing a surface on a square/rectangle
-			xdir = 0
-			ydir = 0
-			v = vector.Vector2D(0,0)
-			if abs(dx) == abs(dy):
-				if abs(dx) == 0:				#centre
-					return v
-				v.x = ft(dx)
-				v.y = ft(dy)
-				return v #corners
-			if abs(dx) > abs(dy):	#left/right sides
-				xdir = ft(dx)
-				ydir = 0
-			elif abs(dy) > abs(dx):	#top/bottom sides
-				xdir = 0
-				ydir = ft(dy)
-			v.x = xdir
-			v.y = ydir
-			return v
-		
-		v = intersection_vector(self, rect)
-		print v
-		if abs(v.x) == abs(v.y): 	#for corners
-			if ft(self.vel.y) == v.y*-1:
-				self.bounceX()
-			if ft(self.vel.x) == v.x*-1:
-				self.bounceY()
-		else:				
-			
-							#for sides
-			if v.x != 0:
-				self.bounceX()
-				
-			if v.y != 0:
-				
-				self.bounceY()
-			
-		#reposition ball
-		hw = rect.w/2
-		hh = rect.h/2
-		rad = self.radius
-		if v.x < 0:
-			self.pos.x = v.x *(hw + rad*2 + 1) +(rect.x + hw)
-		if v.x > 0:
-			self.pos.x = v.x *(hw + 1) +(rect.x + hw)
-		if v.y < 0:
-			self.pos.y = v.y *(hh + rad*2 +1) +(rect.y + hh)
-		if v.y > 0:
-			self.pos.y = v.y *(hh + 1) +(rect.y + hh)
-	"""
-	
-	
-	def _intersection_vector (self, rect):		
-		#	Input:	| - ball: Ball object
-		#			| - rect: Rect object
-		#		ball and rect objects have (x,y) coordinates i in top-left corner
-		#	Return:	| - If Ball og Rect har kollidert:
-		#			|  	Vector2D object indicating surface on Rect hit by Ball
-		#			| - Ellers: False
-		#
-		rad = self.radius	#Radius
-		hw = rect.w/2		#Distance from centre of Rect to left/right edges/corners
-		hh = rect.h/2		#Distance from centre of Rect to top/bottom edges/corners
-		
-		dx = (self.pos.x+rad)-(rect.x+hw)	#Ball x-position relative to Rect
-		dy = (self.pos.y+rad)-(rect.y+hh)	#Ball y-position relative to Rect
-		
-		mDX = rad + hw					#Maximum dx
-		mDY = rad + hh					#Maximum dy
-		#make x, y distances into ratios
-		dx /= mDX 
-		dy /= mDY
-		
-		#make variables representing a surface on a square/rectangle
-		xdir = 0
-		ydir = 0
-		v = vector.Vector2D(0,0)
-		if abs(dx) == abs(dy):
-			if abs(dx) == 0:				#centre
-				return v
-			v.x = ft(dx)
-			v.y = ft(dy)
-			return v #corners
-		if abs(dx) > abs(dy):	#left/right sides
-			xdir = ft(dx)
-			ydir = 0
-		elif abs(dy) > abs(dx):	#top/bottom sides
-			xdir = 0
-			ydir = ft(dy)
-		v.x = xdir
-		v.y = ydir
-		return v
-	
+	@staticmethod
+	def _bounce (c, r):
+		half = (float(r.w)/2, float(r.h)/2)
+		center = (c.pos.x + c.radius - (r.x+half[0]), c.pos.y + c.radius - (r.y+half[1]))
+		side = (abs(center[0]) - half[0], abs(center[1]) - half[1])
+
+		if (side[0] > c.radius or side[1] > c.radius):
+			return False
+		if (side[0] < -c.radius and side[1] < - c.radius):
+			return False
+
+		if (side[0] < 0 or side[1] < 0):
+			dx = 0
+			dy = 0
+			if (abs(side[0]) < c.radius and side[1] < 0):
+				if center[0]*side[0] < 0:
+					dx = -1
+				else:
+					dx = 1
+			elif (abs(side[1]) < c.radius and side[0] < 0):
+				if (center[1]*side[1] < 0):
+					dy = -1
+				else:
+					dy = 1
+			return (dx, dy)
+		bounce = (side[0] ** 2) + (side[1] ** 2) < c.radius ** 2
+		if (bounce is False):
+			return False
+		norm = math.sqrt((side[0] ** 2) + (side[1] ** 2))
+		dx = float(1)
+		if center[0] < 0:
+			dx = -1
+		dy = float(1)
+		if center[1] < 1:
+			dy = -1
+		dx *= side[0]
+		dx /= norm
+		dy *= side[1]
+		dy /= norm
+		return (dx, dy)
+
 	def update(self, time, blocks):
 		
+
 		nextpos = self.pos + (self.vel * time)
 		
 		self.lastTime += time
@@ -225,57 +145,37 @@ class Ball (pygame.sprite.Sprite, Circle):
 			self.lastTime %= Ball.ttn
 
 		""" interact with walls """
-		nextpos = self.border_collision(nextpos, config.play_size)
+	#	nextpos = self.border_collision(nextpos, config.play_size)
+		
 		self.pos = nextpos
-
 		""" interact with blocks """
-		blocks = pygame.sprite.spritecollide(self, blocks, False, intersections.intersection_BR)
-		if blocks is not None:
-			xbounce = 0
-			ybounce = 0
-			for block in blocks:
-				
-				v = self._intersection_vector(block.rect)
-					#reposition ball
-				hw = block.rect.w/2
-				hh = block.rect.h/2
-				rad = self.radius
-				if v.x < 0:
-					self.pos.x = v.x *(hw + rad*2 + 1) +(block.rect.x + hw)
-				if v.x > 0:
-					self.pos.x = v.x *(hw + 1) +(block.rect.x + hw)
-				if v.y < 0:
-					self.pos.y = v.y *(hh + rad*2 +1) +(block.rect.y + hh)
-				if v.y > 0:
-					self.pos.y = v.y *(hh + 1) +(block.rect.y + hh)
-				
-				
-			#	print v
-				if abs(v.x) == abs(v.y): 	#for corners
-					if ft(self.vel.y) == v.y*-1:
-						xbounce += 1
-					if ft(self.vel.x) == v.x*-1:
-						ybounce += 1
-				else:				
-					
-									#for sides
-					if v.x != 0:
-						xbounce += 1
-					if v.y != 0:
-						ybounce += 1
-				
-			if xbounce > 0:
-				self.bounceX()
-			if ybounce > 0:
-				self.bounceY()
-					
+		for block in blocks:
+			v = Ball._bounce(self, block.rect)
+			if v is not False and v != (0, 0):
+				print v
+				vec =vector.Vector2D(v[0], v[1])
+				if v[0] != 0:
+					if self.vel.x == 0:
+						self.vel.x = v[0]
+					else:
+						vx = self.vel.x * v[0]
+						self.vel.x = -vx
+						nextpos.x += v[0]
+				if v[1] != 0:
+					if self.vel.y == 0:
+						self.vel.y = v[1]
+					else:
+						vy = self.vel.y * v[1]
+						self.vel.y = -vy
+						nextpos.y += v[1]
+		self.pos = nextpos		
+
 				
 		
 
 
 		self.rect.x = self.pos.x
 		self.rect.y = self.pos.y
-
 
 
 import keyboard
@@ -296,15 +196,15 @@ if __name__ == "__main__":
 	b = blocks.Block((block_x, block_y))
 	blocks.group.add(b)
 
-	spawn_x = block_x - 24
-	spawn_y = 200
+	spawn_x = block_x + 170
+	spawn_y = 100-24
 
 
 	def spawn(x, y):
 		b_pos = (x, y)
 
-		vx = 0
-		vy = -1
+		vx = -1
+		vy = 0
 
 		b = Ball(b_pos, (vx, vy))
 		group.add(b)
@@ -330,7 +230,7 @@ if __name__ == "__main__":
 			quit = True
 		if (key[keyboard.M.SPC] and not spawned):
 			spawn(spawn_x, spawn_y)
-			spawn_x += 2
+			spawn_y += 2
 			spawned = True
 		elif spawned == True and key[keyboard.M.SPC] == 0:
 			spawned = False
