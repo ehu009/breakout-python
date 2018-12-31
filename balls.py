@@ -5,6 +5,7 @@ import vector
 import animate
 
 import intersections
+from helpers import *
 
 group = pygame.sprite.Group()
 
@@ -164,13 +165,49 @@ class Ball (pygame.sprite.Sprite, Circle):
 		if v.y > 0:
 			self.pos.y = v.y *(hh + 1) +(rect.y + hh)
 		
-	@staticmethod
-	def ft(x):	
-		if x == 0:
-			return 0
-		return x/abs(x)
+	
+	
+	def _intersection_vector (self, rect):		
+		#	Input:	| - ball: Ball object
+		#			| - rect: Rect object
+		#		ball and rect objects have (x,y) coordinates i in top-left corner
+		#	Return:	| - If Ball og Rect har kollidert:
+		#			|  	Vector2D object indicating surface on Rect hit by Ball
+		#			| - Ellers: False
+		#
+		rad = self.radius	#Radius
+		hw = rect.w/2		#Distance from centre of Rect to left/right edges/corners
+		hh = rect.h/2		#Distance from centre of Rect to top/bottom edges/corners
 		
+		dx = (self.pos.x+rad)-(rect.x+hw)	#Ball x-position relative to Rect
+		dy = (self.pos.y+rad)-(rect.y+hh)	#Ball y-position relative to Rect
 		
+		mDX = rad + hw					#Maximum dx
+		mDY = rad + hh					#Maximum dy
+		#make x, y distances into ratios
+		dx /= mDX 
+		dy /= mDY
+		
+		#make variables representing a surface on a square/rectangle
+		xdir = 0
+		ydir = 0
+		v = vector.Vector2D(0,0)
+		if abs(dx) == abs(dy):
+			if abs(dx) == 0:				#centre
+				return v
+			v.x = ft(dx)
+			v.y = ft(dy)
+			return v #corners
+		if abs(dx) > abs(dy):	#left/right sides
+			xdir = ft(dx)
+			ydir = 0
+		elif abs(dy) > abs(dx):	#top/bottom sides
+			xdir = 0
+			ydir = ft(dy)
+		v.x = xdir
+		v.y = ydir
+		return v
+	
 	def update(self, time, blocks):
 		
 		nextpos = self.pos + (self.vel * time)
@@ -193,51 +230,7 @@ class Ball (pygame.sprite.Sprite, Circle):
 			ybounce = 0
 			for block in blocks:
 				
-					
-				
-				# Hit-test: Rect, Ball
-				def intersection_vector (ball, rect):		
-					#	Input:	| - ball: Ball object
-					#			| - rect: Rect object
-					#		ball and rect objects have (x,y) coordinates i in top-left corner
-					#	Return:	| - If Ball og Rect har kollidert:
-					#			|  	Vector2D object indicating surface on Rect hit by Ball
-					#			| - Ellers: False
-					#
-					rad = ball.radius	#Radius
-					hw = rect.w/2		#Distance from centre of Rect to left/right edges/corners
-					hh = rect.h/2		#Distance from centre of Rect to top/bottom edges/corners
-					
-					dx = (ball.pos.x+rad)-(rect.x+hw)	#Ball x-position relative to Rect
-					dy = (ball.pos.y+rad)-(rect.y+hh)	#Ball y-position relative to Rect
-					
-					mDX = rad + hw					#Maximum dx
-					mDY = rad + hh					#Maximum dy
-					#make x, y distances into ratios
-					dx /= mDX 
-					dy /= mDY
-					
-					#make variables representing a surface on a square/rectangle
-					xdir = 0
-					ydir = 0
-					v = vector.Vector2D(0,0)
-					if abs(dx) == abs(dy):
-						if abs(dx) == 0:				#centre
-							return v
-						v.x = ft(dx)
-						v.y = ft(dy)
-						return v #corners
-					if abs(dx) > abs(dy):	#left/right sides
-						xdir = ft(dx)
-						ydir = 0
-					elif abs(dy) > abs(dx):	#top/bottom sides
-						xdir = 0
-						ydir = ft(dy)
-					v.x = xdir
-					v.y = ydir
-					return v
-				
-				v = intersection_vector(self, block.rect)
+				v = self._intersection_vector(block.rect)
 					#reposition ball
 				hw = block.rect.w/2
 				hh = block.rect.h/2
