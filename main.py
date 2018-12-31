@@ -16,6 +16,7 @@ import balls
 from paddle import Paddle
 from scores import Scoreboard
 
+import blocks
 ##################
 
 
@@ -35,30 +36,6 @@ def border_graphics (g):
 
 
 
-class Block (pygame.sprite.Sprite):
-	
-	def __init__(self, position, frame=-1):
-		super(Block, self).__init__()
-		ss = config.sprite_size
-		r = pygame.Rect(0, 0, ss,ss)
-		x = frame
-		if x == -1:
-			x = random.randint(0,6)
-		r.x = x * ss
-		self.image = config.tileset_image.subsurface(r)
-		self.rect = self.image.get_rect()
-		self.rect.x = position[0]
-		self.rect.y = position[1]
-
-
-
-
-
-
-
-	
-
-block_group = pygame.sprite.Group()			
 
 
 
@@ -70,7 +47,7 @@ def demo_blocks(g):
 		y_coord = ss * (y + 1)
 		for x in range(0,num_blocks_x):
 			x_coord = (1+x)*ss + ps.x
-			b = Block( ( x_coord, y_coord),y%6)
+			b = blocks.Block( ( x_coord, y_coord),y%6)
 			g.add(b)
 
 def demo_balls(g):
@@ -130,7 +107,7 @@ class GameDemo(object):
 			y *= config.sprite_size
 			y += ps.y
 
-			block_group.add(Block((x,y)))
+			blocks.group.add(Block((x,y)))
 
 			self.ttnBlock = 130
 
@@ -162,14 +139,14 @@ class Game(object):
 		self.scores = Scoreboard((0,20*config.sprite_size), 57)
 		
 		border_graphics(graphic_group)
-		demo_blocks(block_group)
+		demo_blocks(blocks.group)
 
 
 	def draw(self, screen):
 		screen.fill((0,0,0))
 		
 		graphic_group.draw(screen)
-		block_group.draw(screen)
+		blocks.group.draw(screen)
 		balls.group.draw(screen)
 
 		self.scores.draw(screen)
@@ -193,7 +170,7 @@ class Game(object):
 				
 			balls.group.update(time)
 
-			block_collisions = pygame.sprite.groupcollide(balls.group, block_group, False, True)
+			block_collisions = pygame.sprite.groupcollide(balls.group, blocks.group, False, True)
 			for key, value in block_collisions.iteritems():
 				if value == None:
 					continue
